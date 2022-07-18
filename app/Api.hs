@@ -24,12 +24,24 @@ data TranslateResponse = TranslateResponse {
 
 instance FromJSON TranslateResponse
 
-main :: IO ()
-main = do
+translateText :: Text -> Text -> Text -> IO Text
+translateText sourceLang textToTranslate targetLang = do 
     rsp <- asJSON =<< post "https://translate.argosopentech.com/translate" (toJSON (TranslateRequest {
-        q = "Haskell is awesome",
-        source = "en",
-        target = "ja",
+        q = textToTranslate,
+        source = sourceLang,
+        target = targetLang,
         format = "text"
     }))
-    T.putStrLn (translatedText (rsp ^. responseBody))
+    pure (translatedText (rsp ^. responseBody))
+
+
+main :: IO ()
+main = do
+    T.putStrLn "What language do you want to translate from?"
+    sourceLanguage <- T.getLine 
+    T.putStrLn "What language do you want to translate to?"
+    targetLanguage <- T.getLine 
+    T.putStrLn "What text would you like to translate?"
+    theTextToTranslate <- T.getLine 
+    result <- translateText sourceLanguage theTextToTranslate targetLanguage
+    T.putStrLn result
